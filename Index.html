@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EvalúaRH · Evaluación de Desempeño</title>
+<style>
+:root{
+  --bg:#F5F6FB;
+  --surface:#FFFFFF;
+  --surface-alt:#F0F1FA;
+  --ink:#1E2130;
+  --ink-soft:#5B5F73;
+  --ink-faint:#8A8DA0;
+  --border:#E2E4F0;
+  --border-soft:#EDEEF6;
+  --primary:#4338CA;
+  --primary-dark:#332C9C;
+  --primary-soft:#EEF0FD;
+  --dim-a:#0D9488; --dim-a-soft:#E6F7F5;
+  --dim-b:#7C3AED; --dim-b-soft:#F2EBFE;
+  --dim-c:#D97706; --dim-c-soft:#FDF1E1;
+  --dim-d:#E11D48; --dim-d-soft:#FDE7EC;
+  --rate-5:#059669; --rate-5-soft:#E3F6EE;
+  --rate-4:#2563EB; --rate-4-soft:#E7EFFD;
+  --rate-3:#D97706; --rate-3-soft:#FDF1E1;
+  --rate-2:#EA580C; --rate-2-soft:#FDEAE0;
+  --rate-1:#DC2626; --rate-1-soft:#FCE7E7;
+  --shadow-sm:0 2px 6px -2px rgba(30,33,48,.08);
+  --shadow-md:0 8px 24px -8px rgba(30,33,48,.14), 0 2px 6px -2px rgba(30,33,48,.08);
+  --shadow-lg:0 20px 48px -12px rgba(30,33,48,.22);
+  --radius-sm:10px;
+  --radius-md:16px;
+  --radius-lg:22px;
+  --font-display:"Segoe UI Semibold","Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  --font-body:"Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:"Consolas","SF Mono","Cascadia Mono",Menlo,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--font-display);margin:0;letter-spacing:-0.01em;}
+p{margin:0;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+::selection{background:var(--primary);color:#fff;}
+a{color:var(--primary);}
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+:focus-visible{outline:3px solid #A5ADFF;outline-offset:2px;border-radius:6px;}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important;}}
+
+/* ===== Shell ===== */
+.shell{max-width:1180px;margin:0 auto;padding:0 24px 80px;}
+.topbar{
+  background:linear-gradient(180deg,#211B5A 0%, #332C9C 55%, var(--primary) 100%);
+  color:#fff;
+  padding:20px 24px 0;
+}
+.topbar-inner{max-width:1180px;margin:0 auto;}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.brand-mark{flex:none;}
+.brand-text h1{font-size:19px;color:#fff;}
+.brand-text .tagline{font-size:12px;color:#C7C4F2;font-family:var(--font-mono);letter-spacing:.04em;}
+.tabs{display:flex;gap:4px;overflow-x:auto;}
+.tab-btn{
+  background:transparent;border:none;color:#C7C4F2;
+  padding:12px 18px;font-size:14px;font-weight:600;border-radius:10px 10px 0 0;
+  white-space:nowrap;transition:background .15s,color .15s;border-bottom:3px solid transparent;
+}
+.tab-btn:hover{color:#fff;background:rgba(255,255,255,.08);}
+.tab-btn.active{color:#fff;background:var(--bg);color:var(--primary-dark);}
+.tab-count{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:20px;
+  background:#EC4899;color:#fff;font-size:10.5px;font-weight:700;
+}
+
+/* ===== Cards / generic ===== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);}
+.card-pad{padding:28px;}
+.section-title{font-size:22px;margin-bottom:4px;}
+.section-sub{color:var(--ink-soft);font-size:14px;margin-bottom:20px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+@media (max-width:820px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+/* ===== Buttons ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px 22px;border-radius:12px;border:1px solid transparent;
+  font-size:14px;font-weight:600;transition:transform .12s,box-shadow .12s,background .12s,opacity .12s;
+}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 6px 18px -6px rgba(67,56,202,.55);}
+.btn-primary:hover{background:var(--primary-dark);}
+.btn-primary:disabled{background:#C9CBE8;box-shadow:none;cursor:not-allowed;color:#8B8EB5;}
+.btn-ghost{background:var(--surface-alt);color:var(--ink);border-color:var(--border);}
+.btn-ghost:hover{background:var(--border-soft);}
+.btn-outline{background:transparent;color:var(--primary);border-color:var(--primary);}
+.btn-outline:hover{background:var(--primary-soft);}
+.btn-danger{background:transparent;color:var(--rate-1);border-color:transparent;}
+.btn-danger:hover{background:var(--rate-1-soft);}
+.btn-sm{padding:8px 14px;font-size:12.5px;border-radius:9px;}
+.btn-block{width:100%;}
+.btn-icon{padding:9px;border-radius:10px;}
+
+/* ===== Forms ===== */
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.01em;}
+.field .hint{font-size:11.5px;color:var(--ink-faint);margin-top:5px;}
+.field input[type=text],.field input[type=date],.field select,.field textarea{
+  width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:11px;
+  font-size:14.5px;color:var(--ink);background:#fff;transition:border-color .12s,box-shadow .12s;
+}
+.field textarea{resize:vertical;min-height:64px;}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-soft);outline:none;
+}
+.required-mark{color:var(--rate-1);}
+
+/* ===== Wizard layout ===== */
+.wizard{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:start;margin-top:28px;}
+@media (max-width:900px){.wizard{grid-template-columns:1fr;}}
+.stepper{position:sticky;top:20px;display:flex;flex-direction:column;gap:2px;}
+@media (max-width:900px){.stepper{position:static;flex-direction:row;overflow-x:auto;gap:8px;padding-bottom:6px;}}
+.step-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--ink-soft);}
+.step-item.done{color:var(--ink);}
+.step-item.current{background:var(--surface);box-shadow:var(--shadow-sm);color:var(--ink);}
+.step-dot{
+  flex:none;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-size:12px;font-weight:700;border:2px solid var(--border);background:#fff;color:var(--ink-faint);
+}
+.step-item.current .step-dot{border-color:var(--primary);color:var(--primary);background:var(--primary-soft);}
+.step-item.done .step-dot{border-color:var(--rate-5);background:var(--rate-5);color:#fff;}
+.step-label{font-size:13px;font-weight:600;white-space:nowrap;}
+
+.progress-track{height:8px;border-radius:20px;background:var(--surface-alt);overflow:hidden;margin:18px 0 0;}
+.progress-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--primary),#818CF8);transition:width .3s ease;}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-faint);margin-top:8px;font-family:var(--font-mono);}
+
+/* ===== Question card ===== */
+.q-block{padding:22px 0;border-bottom:1px solid var(--border-soft);}
+.q-block:last-child{border-bottom:none;}
+.q-text{font-size:15.5px;font-weight:600;margin-bottom:14px;}
+.rate-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.rate-btn{
+  flex:1;min-width:96px;padding:10px 8px;border-radius:11px;border:1.5px solid var(--border);
+  background:#fff;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .12s;
+}
+.rate-btn .num{font-family:var(--font-mono);font-weight:700;font-size:16px;}
+.rate-btn .lbl{font-size:10.5px;color:var(--ink-faint);text-align:center;line-height:1.2;}
+.rate-btn:hover{border-color:var(--primary);}
+.rate-btn.sel-1{background:var(--rate-1-soft);border-color:var(--rate-1);} .rate-btn.sel-1 .num{color:var(--rate-1);}
+.rate-btn.sel-2{background:var(--rate-2-soft);border-color:var(--rate-2);} .rate-btn.sel-2 .num{color:var(--rate-2);}
+.rate-btn.sel-3{background:var(--rate-3-soft);border-color:var(--rate-3);} .rate-btn.sel-3 .num{color:var(--rate-3);}
+.rate-btn.sel-4{background:var(--rate-4-soft);border-color:var(--rate-4);} .rate-btn.sel-4 .num{color:var(--rate-4);}
+.rate-btn.sel-5{background:var(--rate-5-soft);border-color:var(--rate-5);} .rate-btn.sel-5 .num{color:var(--rate-5);}
+.rate-btn.sel-1 .lbl,.rate-btn.sel-2 .lbl,.rate-btn.sel-3 .lbl,.rate-btn.sel-4 .lbl,.rate-btn.sel-5 .lbl{color:inherit;font-weight:700;}
+.dim-tag{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:6px;
+}
+.wizard-actions{display:flex;justify-content:space-between;margin-top:24px;padding-top:20px;border-top:1px solid var(--border-soft);}
+
+/* ===== Results ===== */
+.res-header{
+  background:linear-gradient(135deg,#332C9C,var(--primary) 60%,#5B4FE0);
+  color:#fff;border-radius:var(--radius-lg);padding:32px;position:relative;overflow:hidden;
+}
+.res-header .meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px;}
+@media (max-width:820px){.res-header .meta-grid{grid-template-columns:repeat(2,1fr);}}
+.res-header .meta-item .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:#C7C4F2;font-family:var(--font-mono);}
+.res-header .meta-item .v{font-size:14.5px;font-weight:600;margin-top:3px;}
+.badge-row{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-top:26px;}
+.badge-score{
+  width:120px;height:120px;border-radius:50%;background:#fff;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;box-shadow:var(--shadow-lg);flex:none;
+}
+.badge-score .n{font-family:var(--font-mono);font-size:34px;font-weight:700;line-height:1;}
+.badge-score .of5{font-size:11px;color:var(--ink-faint);}
+.badge-rating{padding:10px 20px;border-radius:14px;font-weight:700;font-size:16px;}
+
+.dim-card{border-radius:var(--radius-md);padding:18px;border:1.5px solid var(--border);}
+.dim-card .dc-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.dim-card .dc-score{font-family:var(--font-mono);font-size:26px;font-weight:700;}
+.dim-card .dc-bar{height:6px;border-radius:6px;background:#00000012;margin-top:12px;overflow:hidden;}
+.dim-card .dc-bar-fill{height:100%;border-radius:6px;}
+
+.radar-wrap{display:flex;align-items:center;justify-content:center;padding:10px;}
+.radar-svg{width:100%;max-width:320px;height:auto;}
+
+.list-highlight{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+.list-highlight li{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;
+  border-radius:12px;background:var(--surface-alt);border:1px solid var(--border-soft);
+}
+.list-highlight .txt{font-size:13.5px;font-weight:600;}
+.list-highlight .dim{font-size:11px;color:var(--ink-faint);font-family:var(--font-mono);}
+.list-highlight .score{font-family:var(--font-mono);font-weight:700;font-size:15px;flex:none;}
+
+.plan-table{width:100%;border-collapse:collapse;}
+.plan-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);padding:8px 10px;border-bottom:2px solid var(--border);}
+.plan-table td{padding:6px;vertical-align:top;border-bottom:1px solid var(--border-soft);}
+.plan-table input,.plan-table textarea{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;}
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:8px;}
+@media (max-width:600px){.sig-grid{grid-template-columns:1fr;}}
+.sig-line{border-top:2px solid var(--ink);margin-top:46px;padding-top:8px;font-size:12px;color:var(--ink-soft);}
+.sig-box input{width:100%;border:none;border-bottom:1.5px dashed var(--border);padding:10px 4px;font-family:var(--font-display);font-size:15px;background:transparent;}
+.sig-box input:focus{outline:none;border-bottom-color:var(--primary);}
+
+/* ===== KPI / Summary ===== */
+.kpi{border-radius:var(--radius-md);padding:20px;color:#fff;position:relative;overflow:hidden;}
+.kpi .kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);opacity:.85;}
+.kpi .kpi-value{font-family:var(--font-mono);font-size:32px;font-weight:700;margin-top:6px;}
+.kpi.k1{background:linear-gradient(135deg,#4338CA,#6366F1);}
+.kpi.k2{background:linear-gradient(135deg,#0D9488,#14B8A6);}
+.kpi.k3{background:linear-gradient(135deg,#059669,#10B981);}
+.kpi.k4{background:linear-gradient(135deg,#DC2626,#EF4444);}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:22px 0 14px;}
+.search-input{padding:11px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:14px;min-width:220px;}
+.data-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+.data-table thead th{
+  text-align:left;padding:12px 14px;background:var(--surface-alt);color:var(--ink-soft);
+  font-size:11px;text-transform:uppercase;letter-spacing:.06em;position:sticky;top:0;
+}
+.data-table thead th:first-child{border-radius:12px 0 0 12px;}
+.data-table thead th:last-child{border-radius:0 12px 12px 0;}
+.data-table tbody td{padding:13px 14px;border-bottom:1px solid var(--border-soft);}
+.data-table tbody tr:hover{background:#FAFAFE;}
+.pill{display:inline-flex;align-items:center;padding:4px 11px;border-radius:20px;font-size:11.5px;font-weight:700;}
+.row-actions{display:flex;gap:6px;}
+.empty-state{text-align:center;padding:60px 24px;color:var(--ink-soft);}
+.empty-state .big{font-size:44px;margin-bottom:8px;}
+
+/* ===== Manual ===== */
+.manual details{border:1px solid var(--border);border-radius:14px;margin-bottom:10px;background:#fff;overflow:hidden;}
+.manual summary{padding:16px 18px;font-weight:700;font-size:14.5px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;}
+.manual summary::-webkit-details-marker{display:none;}
+.manual summary::after{content:"+";font-size:20px;color:var(--primary);font-weight:400;}
+.manual details[open] summary::after{content:"–";}
+.manual .m-body{padding:0 18px 18px;color:var(--ink-soft);font-size:14px;line-height:1.7;}
+.manual .m-body p{margin-bottom:10px;}
+.manual .m-body ol,.manual .m-body ul{margin:0 0 10px;padding-left:20px;}
+.manual .m-body li{margin-bottom:6px;}
+.manual .m-body code{font-family:var(--font-mono);background:var(--surface-alt);padding:1px 6px;border-radius:5px;font-size:12.5px;}
+
+/* ===== Toast ===== */
+.toast{
+  position:fixed;bottom:22px;right:22px;background:var(--ink);color:#fff;padding:14px 20px;border-radius:12px;
+  box-shadow:var(--shadow-lg);font-size:13.5px;font-weight:600;z-index:999;display:flex;align-items:center;gap:10px;
+  animation:toast-in .25s ease;
+}
+.toast.ok{background:#0E4B3A;} .toast.err{background:#5C1414;} .toast.info{background:#1E2130;}
+@keyframes toast-in{from{transform:translateY(12px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+/* ===== Print ===== */
+.no-print{}
+@media print{
+  body{background:#fff;}
+  .topbar,.no-print{display:none !important;}
+  body *{visibility:hidden;}
+  .printable-area,.printable-area *{visibility:visible;}
+  .printable-area{position:absolute;left:0;top:0;width:100%;padding:0;margin:0;box-shadow:none;border:none;}
+  .res-header{background:#332C9C !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .shell{padding:0;max-width:100%;}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast-root"></div>
+<script>
+/* =========================================================================
+   EvalúaRH — Sistema de Evaluación de Desempeño
+   Aplicación autónoma (HTML + CSS + JS). Sin librerías externas.
+   ========================================================================= */
+
+/* ---------- Configuración de dimensiones y preguntas ---------- */
+const DIMENSIONS = [
+  { id:'A', name:'Desempeño de funciones', short:'Desempeño', color:'var(--dim-a)', hex:'#0D9488', soft:'var(--dim-a-soft)', levels:null,
+    questions:[
+      {id:'A1', text:'Calidad del trabajo entregado'},
+      {id:'A2', text:'Cumplimiento de metas y plazos'},
+      {id:'A3', text:'Conocimiento técnico del puesto'},
+      {id:'A4', text:'Productividad'}
+    ]},
+  { id:'B', name:'Competencias conductuales', short:'Competencias', color:'var(--dim-b)', hex:'#7C3AED', soft:'var(--dim-b-soft)', levels:null,
+    questions:[
+      {id:'B1', text:'Trabajo en equipo'},
+      {id:'B2', text:'Comunicación'},
+      {id:'B3', text:'Iniciativa y proactividad'},
+      {id:'B4', text:'Resolución de problemas'},
+      {id:'B5', text:'Adaptabilidad al cambio'}
+    ]},
+  { id:'C', name:'Actitud y disciplina laboral', short:'Actitud', color:'var(--dim-c)', hex:'#D97706', soft:'var(--dim-c-soft)', levels:null,
+    questions:[
+      {id:'C1', text:'Puntualidad y asistencia'},
+      {id:'C2', text:'Cumplimiento de normas y políticas internas'},
+      {id:'C3', text:'Relaciones interpersonales'},
+      {id:'C4', text:'Compromiso institucional'}
+    ]},
+  { id:'D', name:'Liderazgo', short:'Liderazgo', color:'var(--dim-d)', hex:'#E11D48', soft:'var(--dim-d-soft)', levels:['Directivo','Supervisión'],
+    questions:[
+      {id:'D1', text:'Capacidad de dirección de equipos'},
+      {id:'D2', text:'Toma de decisiones'},
+      {id:'D3', text:'Delegación y seguimiento'}
+    ]}
+];
+const RATING_LABELS = {5:'Excelente',4:'Muy bueno',3:'Satisfactorio',2:'Necesita mejorar',1:'Insatisfactorio'};
+const NIVELES = ['Directivo','Supervisión','Operativo'];
+const LS_EVALS = 'evaluarh_v1_evaluaciones';
+const LS_DRAFT = 'evaluarh_v1_borrador';
+
+/* ---------- Utilidades ---------- */
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function uid(){ return 'ev_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function fmtDate(iso){ if(!iso) return '—'; const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; }
+function fmtScore(n){ return (Math.round(n*10)/10).toFixed(1); }
+function clamp(n,a,b){ return Math.max(a,Math.min(b,n)); }
+
+function applicableDimensions(nivel){
+  return DIMENSIONS.filter(d => !d.levels || d.levels.includes(nivel));
+}
+function ratingFor(score){
+  if(score>=4.5) return {label:'Excelente', key:5, var:'--rate-5', soft:'--rate-5-soft'};
+  if(score>=3.8) return {label:'Muy bueno', key:4, var:'--rate-4', soft:'--rate-4-soft'};
+  if(score>=3.0) return {label:'Satisfactorio', key:3, var:'--rate-3', soft:'--rate-3-soft'};
+  if(score>=2.0) return {label:'Necesita mejorar', key:2, var:'--rate-2', soft:'--rate-2-soft'};
+  return {label:'Insatisfactorio', key:1, var:'--rate-1', soft:'--rate-1-soft'};
+}
+function dimAverage(dim, respuestas){
+  const vals = dim.questions.map(q=>respuestas[q.id]).filter(v=>v!=null);
+  if(!vals.length) return null;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function computeScores(ev){
+  const dims = applicableDimensions(ev.nivel);
+  const perDim = dims.map(d=>({ dim:d, avg: dimAverage(d, ev.respuestas) }));
+  const validAvgs = perDim.filter(p=>p.avg!=null).map(p=>p.avg);
+  const overall = validAvgs.length ? validAvgs.reduce((a,b)=>a+b,0)/validAvgs.length : 0;
+  return { perDim, overall, rating: ratingFor(overall) };
+}
+function allQuestionScores(ev){
+  const dims = applicableDimensions(ev.nivel);
+  const list = [];
+  dims.forEach(d=>d.questions.forEach(q=>{
+    if(ev.respuestas[q.id]!=null) list.push({id:q.id, text:q.text, dimId:d.id, dimName:d.short, color:d.hex, score:ev.respuestas[q.id]});
+  }));
+  return list;
+}
+function topBottom(ev, n=3){
+  const list = allQuestionScores(ev);
+  const top = [...list].sort((a,b)=>b.score-a.score || a.text.localeCompare(b.text)).slice(0,n);
+  const bottom = [...list].sort((a,b)=>a.score-b.score || a.text.localeCompare(b.text)).slice(0,n);
+  return {top, bottom};
+}
+
+/* ---------- Almacenamiento local (persistente entre sesiones) ---------- */
+let storageOK = true;
+function saveEvaluations(){
+  try{ localStorage.setItem(LS_EVALS, JSON.stringify(state.evaluations)); }
+  catch(e){ storageOK = false; }
+}
+function loadEvaluations(){
+  try{ const raw = localStorage.getItem(LS_EVALS); return raw ? JSON.parse(raw) : []; }
+  catch(e){ storageOK = false; return []; }
+}
+function saveDraft(){
+  try{ localStorage.setItem(LS_DRAFT, JSON.stringify(state.draft)); }catch(e){}
+}
+function loadDraft(){
+  try{ const raw = localStorage.getItem(LS_DRAFT); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+}
+function clearDraftStorage(){ try{ localStorage.removeItem(LS_DRAFT); }catch(e){} }
+
+/* ---------- Estado de la aplicación ---------- */
+function emptyDraft(){
+  return {
+    id: uid(),
+    nombre:'', cargo:'', departamento:'', tiempoPuesto:'', jefeInmediato:'',
+    periodo:'', nivel:'',
+    respuestas:{}, comentarios:{},
+    plan:[{objetivo:'',accion:'',fecha:''}],
+    firmaEvaluador:'', firmaEvaluado:'', fechaFirma: todayISO(),
+    creadoEn: Date.now()
+  };
+}
+let state = {
+  view: 'wizard',      // 'wizard' | 'results' | 'summary' | 'manual' | 'report'
+  step: 0,              // índice dentro de wizardSteps()
+  draft: emptyDraft(),
+  evaluations: [],
+  reportTargetId: null, // id de evaluación guardada a mostrar en 'report'
+  search: '',
+  toast: null
+};
+
+function wizardSteps(draft){
+  return ['general', ...applicableDimensions(draft.nivel).map(d=>d.id)];
+}
+
+function showToast(msg, type){
+  type = type || 'info';
+  const tid = Date.now()+Math.random();
+  state.toast = {msg, type, tid};
+  renderToast();
+  setTimeout(()=>{ if(state.toast && state.toast.tid===tid){ state.toast=null; renderToast(); } }, 3200);
+}
+function renderToast(){
+  const root = document.getElementById('toast-root');
+  if(!state.toast){ root.innerHTML=''; return; }
+  const icon = state.toast.type==='ok'?'✓':state.toast.type==='err'?'⚠':'ℹ';
+  root.innerHTML = `<div class="toast ${esc(state.toast.type)}"><span>${icon}</span><span>${esc(state.toast.msg)}</span></div>`;
+}
+
+/* Actualiza un campo de texto del borrador SIN re-renderizar (evita perder el foco) */
+function updateDraftField(key, value){
+  state.draft[key] = value;
+  saveDraft();
+  refreshLiveBits();
+}
+function updateComment(qid, value){
+  state.draft.comentarios[qid] = value;
+  saveDraft();
+}
+function updatePlanField(idx, key, value){
+  state.draft.plan[idx][key] = value;
+  saveDraft();
+}
+function updateSignature(key, value){
+  state.draft[key] = value;
+  saveDraft();
+}
+/* Actualiza pequeños fragmentos visibles (contador, botón habilitado) sin redibujar todo */
+function refreshLiveBits(){
+  const btn = document.getElementById('btn-start-eval');
+  if(btn){ btn.disabled = !(state.draft.nombre.trim() && state.draft.cargo.trim() && state.draft.departamento.trim()); }
+}
+
+/* ---------- Navegación del asistente ---------- */
+function setRating(qid, value){
+  state.draft.respuestas[qid] = value;
+  saveDraft();
+  render();
+}
+function currentDimId(){
+  const steps = wizardSteps(state.draft);
+  return steps[state.step];
+}
+function dimComplete(dim){
+  return dim.questions.every(q => state.draft.respuestas[q.id]!=null);
+}
+function goNext(){
+  const steps = wizardSteps(state.draft);
+  const key = steps[state.step];
+  if(key==='general'){
+    if(!state.draft.nombre.trim() || !state.draft.cargo.trim() || !state.draft.departamento.trim()){
+      showToast('Completa nombre, cargo y departamento para continuar.','err'); return;
+    }
+    if(!state.draft.nivel){ showToast('Selecciona el nivel del colaborador.','err'); return; }
+  } else {
+    const dim = DIMENSIONS.find(d=>d.id===key);
+    if(!dimComplete(dim)){ showToast('Califica todas las preguntas de esta sección.','err'); return; }
+  }
+  if(state.step < steps.length-1){ state.step++; render(); window.scrollTo(0,0); }
+  else { state.view='results'; render(); window.scrollTo(0,0); }
+}
+function goBack(){
+  if(state.step>0){ state.step--; render(); window.scrollTo(0,0); }
+}
+function goToStep(i){
+  const steps = wizardSteps(state.draft);
+  if(i < state.step){ state.step = i; render(); window.scrollTo(0,0); }
+}
+function backToWizardFromResults(){
+  state.view='wizard';
+  state.step = wizardSteps(state.draft).length - 1;
+  render(); window.scrollTo(0,0);
+}
+
+/* ---------- Plan de acción ---------- */
+function addPlanRow(){
+  state.draft.plan.push({objetivo:'',accion:'',fecha:''});
+  render();
+}
+function removePlanRow(idx){
+  state.draft.plan.splice(idx,1);
+  if(!state.draft.plan.length) state.draft.plan.push({objetivo:'',accion:'',fecha:''});
+  render();
+}
+
+/* ---------- Guardar / eliminar evaluaciones ---------- */
+function saveEvaluationAndReset(){
+  const scores = computeScores(state.draft);
+  const record = JSON.parse(JSON.stringify(state.draft));
+  record.overall = scores.overall;
+  record.ratingLabel = scores.rating.label;
+  record.guardadoEn = Date.now();
+  state.evaluations.push(record);
+  saveEvaluations();
+  clearDraftStorage();
+  state.draft = emptyDraft();
+  state.step = 0;
+  state.view = 'summary';
+  showToast('Evaluación guardada correctamente.','ok');
+  render(); window.scrollTo(0,0);
+}
+function discardDraft(){
+  if(!confirm('¿Descartar esta evaluación en curso? Se perderá la información no guardada.')) return;
+  clearDraftStorage();
+  state.draft = emptyDraft();
+  state.step = 0;
+  state.view = 'wizard';
+  render();
+}
+function deleteEvaluation(id){
+  const ev = state.evaluations.find(e=>e.id===id);
+  if(!ev) return;
+  if(!confirm(`¿Eliminar la evaluación de "${ev.nombre}"? Esta acción no se puede deshacer.`)) return;
+  state.evaluations = state.evaluations.filter(e=>e.id!==id);
+  saveEvaluations();
+  showToast('Registro eliminado.','ok');
+  render();
+}
+function openReport(id){
+  state.reportTargetId = id;
+  state.view = 'report';
+  render(); window.scrollTo(0,0);
+}
+
+/* ---------- Exportar / importar respaldo JSON ---------- */
+function exportBackup(){
+  const payload = { app:'EvalúaRH', version:1, exportadoEn:new Date().toISOString(), evaluaciones: state.evaluations };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `evaluarh-respaldo-${todayISO()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('Respaldo descargado.','ok');
+}
+function triggerImport(){ document.getElementById('import-file-input').click(); }
+function handleImportFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = JSON.parse(e.target.result);
+      const list = Array.isArray(data) ? data : data.evaluaciones;
+      if(!Array.isArray(list)) throw new Error('formato inválido');
+      const existingIds = new Set(state.evaluations.map(x=>x.id));
+      let added = 0;
+      list.forEach(rec=>{ if(rec && rec.id && !existingIds.has(rec.id)){ state.evaluations.push(rec); existingIds.add(rec.id); added++; } });
+      saveEvaluations();
+      showToast(`Se importaron ${added} evaluación(es).`, 'ok');
+      render();
+    }catch(err){ showToast('El archivo no es un respaldo válido de EvalúaRH.','err'); }
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+
+/* ---------- Gráfico radar (SVG puro, sin librerías) ---------- */
+function polarPoint(cx,cy,r,angle){ return {x: cx + r*Math.cos(angle), y: cy + r*Math.sin(angle)}; }
+function radarChart(perDim, size){
+  size = size || 280;
+  const n = perDim.length;
+  if(n<3){
+    // con menos de 3 ejes un radar no es legible; usamos barras horizontales en su lugar
+    return null;
+  }
+  const center = size/2, radius = size/2 - 46;
+  const angleStep = (2*Math.PI)/n;
+  let grid = '';
+  for(let l=1;l<=5;l++){
+    const r = radius*(l/5);
+    const pts = perDim.map((p,i)=>polarPoint(center,center,r,angleStep*i-Math.PI/2)).map(p=>p.x+','+p.y).join(' ');
+    grid += `<polygon points="${pts}" fill="none" stroke="#E2E4F0" stroke-width="1"/>`;
+  }
+  const axes = perDim.map((p,i)=>{ const pt=polarPoint(center,center,radius,angleStep*i-Math.PI/2); return `<line x1="${center}" y1="${center}" x2="${pt.x.toFixed(1)}" y2="${pt.y.toFixed(1)}" stroke="#E2E4F0"/>`; }).join('');
+  const dataPts = perDim.map((p,i)=>{ const val = clamp((p.avg||0)/5,0,1); return polarPoint(center,center,radius*val,angleStep*i-Math.PI/2); });
+  const dataPoly = dataPts.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
+  const dots = dataPts.map((p,i)=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="${perDim[i].dim.hex}" stroke="#fff" stroke-width="1.5"/>`).join('');
+  const labels = perDim.map((p,i)=>{
+    const pt = polarPoint(center,center,radius+30,angleStep*i-Math.PI/2);
+    const anchor = Math.abs(pt.x-center)<6 ? 'middle' : (pt.x>center?'start':'end');
+    return `<text x="${pt.x.toFixed(1)}" y="${pt.y.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-size="12" font-weight="700" fill="${p.dim.hex}">${esc(p.dim.short)} · ${p.avg!=null?fmtScore(p.avg):'—'}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${size} ${size}" class="radar-svg" role="img" aria-label="Gráfico de dimensiones evaluadas">
+    ${grid}${axes}
+    <polygon points="${dataPoly}" fill="#4338CA26" stroke="#4338CA" stroke-width="2.5"/>
+    ${dots}${labels}
+  </svg>`;
+}
+
+/* ---------- Generador de informe ejecutivo (texto narrativo) ---------- */
+function generateNarrative(ev, scores){
+  const nombre = ev.nombre || 'El/la colaborador(a)';
+  const overall = scores.overall;
+  const rating = scores.rating.label;
+  const sorted = [...scores.perDim].filter(p=>p.avg!=null).sort((a,b)=>b.avg-a.avg);
+  const fuerte = sorted[0];
+  const debil = sorted[sorted.length-1];
+  const {top, bottom} = topBottom(ev,3);
+
+  let apertura;
+  if(overall>=4.5) apertura = `${nombre} tuvo un desempeño sobresaliente durante el período evaluado, alcanzando un promedio general de ${fmtScore(overall)} sobre 5.0, calificado como "${rating}". Los resultados reflejan un desempeño consistente y por encima de las expectativas del puesto.`;
+  else if(overall>=3.8) apertura = `${nombre} presentó un desempeño sólido durante el período evaluado, con un promedio general de ${fmtScore(overall)} sobre 5.0, calificado como "${rating}". El resultado indica un cumplimiento adecuado de las expectativas, con oportunidades puntuales de crecimiento.`;
+  else if(overall>=3.0) apertura = `${nombre} obtuvo un promedio general de ${fmtScore(overall)} sobre 5.0 durante el período evaluado, calificado como "${rating}". El desempeño se ubica dentro de un rango aceptable, aunque existen áreas concretas que ameritan atención y seguimiento.`;
+  else if(overall>=2.0) apertura = `${nombre} obtuvo un promedio general de ${fmtScore(overall)} sobre 5.0 durante el período evaluado, calificado como "${rating}". Los resultados evidencian brechas relevantes frente a las expectativas del puesto que requieren un plan de mejora estructurado.`;
+  else apertura = `${nombre} obtuvo un promedio general de ${fmtScore(overall)} sobre 5.0 durante el período evaluado, calificado como "${rating}". Los resultados son significativamente inferiores a lo esperado para el puesto y requieren intervención inmediata por parte de la jefatura y Recursos Humanos.`;
+
+  let parrafoDims = '';
+  if(fuerte && debil && fuerte.dim.id!==debil.dim.id){
+    parrafoDims = `La dimensión con mejor desempeño fue "${fuerte.dim.name}" (${fmtScore(fuerte.avg)}/5.0), mientras que "${debil.dim.name}" (${fmtScore(debil.avg)}/5.0) representa el área que requiere mayor atención dentro del plan de desarrollo.`;
+  } else if(fuerte){
+    parrafoDims = `Todas las dimensiones evaluadas mostraron un comportamiento homogéneo, con "${fuerte.dim.name}" como referencia principal (${fmtScore(fuerte.avg)}/5.0).`;
+  }
+
+  const fortalezasTxt = top.length ? `Entre las fortalezas más destacadas se encuentran: ${top.map(t=>`"${t.text}" (${t.score}/5)`).join(', ')}.` : '';
+  const oportunidadesTxt = bottom.length ? `Como áreas de oportunidad prioritarias se identifican: ${bottom.map(t=>`"${t.text}" (${t.score}/5)`).join(', ')}.` : '';
+
+  let cierre;
+  if(overall>=3.8) cierre = `Se recomienda reconocer el desempeño demostrado y mantener el acompañamiento habitual, enfocando el plan de acción en fortalecer aún más las áreas de oportunidad identificadas y en preparar posibles rutas de crecimiento dentro de la organización.`;
+  else if(overall>=3.0) cierre = `Se recomienda dar seguimiento cercano al plan de acción acordado, con revisiones periódicas junto a la jefatura inmediata para asegurar avances medibles en las áreas de oportunidad señaladas.`;
+  else cierre = `Se recomienda formalizar un plan de mejora con metas claras, plazos definidos y seguimiento quincenal o mensual por parte de la jefatura inmediata y Recursos Humanos, a fin de revertir oportunamente los resultados obtenidos.`;
+
+  return { apertura, parrafoDims, fortalezasTxt, oportunidadesTxt, cierre };
+}
+
+/* ===========================================================================
+   RENDER
+   ========================================================================= */
+function setView(v){ state.view = v; render(); window.scrollTo(0,0); }
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = renderTopbar() + `<div class="shell">${renderBody()}</div>`;
+  renderToast();
+}
+
+function renderTopbar(){
+  const tabs = [
+    {id:'wizard', label:'Nueva evaluación'},
+    {id:'summary', label:`Resumen`, count: state.evaluations.length},
+    {id:'manual', label:'Manual de uso'}
+  ];
+  const activeView = (state.view==='results') ? 'wizard' : (state.view==='report' ? 'summary' : state.view);
+  return `
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <svg class="brand-mark" width="34" height="34" viewBox="0 0 34 34" fill="none">
+          <polygon points="17,2 30.5,11.5 25.5,27.5 8.5,27.5 3.5,11.5" fill="none" stroke="#A5ADFF" stroke-width="2"/>
+          <circle cx="17" cy="9" r="2.6" fill="#EC4899"/>
+          <circle cx="24.5" cy="14.5" r="2.6" fill="#818CF8"/>
+          <circle cx="21.7" cy="22.5" r="2.6" fill="#818CF8"/>
+          <circle cx="12.3" cy="22.5" r="2.6" fill="#818CF8"/>
+          <circle cx="9.5" cy="14.5" r="2.6" fill="#818CF8"/>
+        </svg>
+        <div class="brand-text">
+          <h1>EvalúaRH</h1>
+          <div class="tagline">SISTEMA DE EVALUACIÓN DE DESEMPEÑO · PANAMÁ</div>
+        </div>
+      </div>
+      <div class="tabs" role="tablist">
+        ${tabs.map(t=>`
+          <button class="tab-btn ${activeView===t.id?'active':''}" onclick="setView('${t.id}')" role="tab" aria-selected="${activeView===t.id}">
+            ${esc(t.label)}${t.count!=null?`<span class="tab-count">${t.count}</span>`:''}
+          </button>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderBody(){
+  if(state.view==='wizard') return renderWizard();
+  if(state.view==='results') return renderResultsView();
+  if(state.view==='summary') return renderSummaryView();
+  if(state.view==='manual') return renderManualView();
+  if(state.view==='report') return renderReportView();
+  return '';
+}
+
+/* ---------- PASO A PASO: Nueva evaluación ---------- */
+function renderWizard(){
+  const draft = state.draft;
+  const steps = wizardSteps(draft);
+  const key = steps[state.step];
+  const pct = Math.round(((state.step)/(steps.length-1||1))*100);
+
+  const stepperHTML = steps.map((k,i)=>{
+    const label = k==='general' ? 'Datos generales' : DIMENSIONS.find(d=>d.id===k).name;
+    const cls = i===state.step ? 'current' : (i<state.step ? 'done' : '');
+    return `<div class="step-item ${cls}" ${i<state.step?`onclick="goToStep(${i})" style="cursor:pointer"`:''}>
+      <div class="step-dot">${i<state.step?'✓':(i+1)}</div>
+      <div class="step-label">${esc(label)}</div>
+    </div>`;
+  }).join('');
+
+  let content;
+  if(key==='general') content = renderGeneralStep(draft);
+  else content = renderDimensionStep(DIMENSIONS.find(d=>d.id===key), draft);
+
+  return `
+  <div class="wizard">
+    <nav class="stepper no-print">${stepperHTML}</nav>
+    <div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-label"><span>Paso ${state.step+1} de ${steps.length}</span><span>${pct}% completado</span></div>
+      ${(draft.nombre || Object.keys(draft.respuestas).length) ? `<div class="no-print" style="text-align:right;margin-top:8px;"><button class="btn btn-danger btn-sm" onclick="discardDraft()">Descartar esta evaluación</button></div>` : ''}
+      <div class="card card-pad" style="margin-top:10px;">
+        ${content}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderGeneralStep(d){
+  const btnDisabled = !(d.nombre.trim() && d.cargo.trim() && d.departamento.trim());
+  return `
+  <div class="eyebrow">Paso 1</div>
+  <h2 class="section-title">Datos generales del colaborador</h2>
+  <p class="section-sub">Esta información aparecerá en el encabezado del informe de resultados.</p>
+  <div class="grid-2">
+    <div class="field">
+      <label>Nombre completo <span class="required-mark">*</span></label>
+      <input type="text" value="${esc(d.nombre)}" oninput="updateDraftField('nombre', this.value)" placeholder="Ej. Ana Isabel Castillo">
+    </div>
+    <div class="field">
+      <label>Cargo <span class="required-mark">*</span></label>
+      <input type="text" value="${esc(d.cargo)}" oninput="updateDraftField('cargo', this.value)" placeholder="Ej. Coordinadora de Logística">
+    </div>
+    <div class="field">
+      <label>Departamento <span class="required-mark">*</span></label>
+      <input type="text" value="${esc(d.departamento)}" oninput="updateDraftField('departamento', this.value)" placeholder="Ej. Operaciones">
+    </div>
+    <div class="field">
+      <label>Tiempo en el puesto</label>
+      <input type="text" value="${esc(d.tiempoPuesto)}" oninput="updateDraftField('tiempoPuesto', this.value)" placeholder="Ej. 2 años, 3 meses">
+    </div>
+    <div class="field">
+      <label>Jefe inmediato</label>
+      <input type="text" value="${esc(d.jefeInmediato)}" oninput="updateDraftField('jefeInmediato', this.value)" placeholder="Ej. Roberto Chen">
+    </div>
+    <div class="field">
+      <label>Período evaluado</label>
+      <input type="text" value="${esc(d.periodo)}" oninput="updateDraftField('periodo', this.value)" placeholder="Ej. Enero – Junio 2026">
+    </div>
+    <div class="field" style="grid-column:1/-1;max-width:340px;">
+      <label>Nivel del colaborador <span class="required-mark">*</span></label>
+      <select onchange="updateDraftField('nivel', this.value); render();">
+        <option value="">Selecciona un nivel…</option>
+        ${NIVELES.map(n=>`<option value="${n}" ${d.nivel===n?'selected':''}>${n}</option>`).join('')}
+      </select>
+      <div class="hint">${d.nivel==='Operativo' ? 'El bloque de Liderazgo no aplica para nivel Operativo.' : 'Los niveles Directivo y Supervisión incluyen el bloque de Liderazgo.'}</div>
+    </div>
+  </div>
+  <div class="wizard-actions">
+    <span></span>
+    <button class="btn btn-primary" id="btn-start-eval" ${btnDisabled?'disabled':''} onclick="goNext()">Comenzar evaluación →</button>
+  </div>`;
+}
+
+function renderDimensionStep(dim, d){
+  const idx = DIMENSIONS.findIndex(x=>x.id===dim.id);
+  const qHTML = dim.questions.map(q=>{
+    const val = d.respuestas[q.id];
+    const ratesHTML = [5,4,3,2,1].map(n=>`
+      <button type="button" class="rate-btn ${val===n?'sel-'+n:''}" onclick="setRating('${q.id}', ${n})" aria-pressed="${val===n}">
+        <span class="num">${n}</span><span class="lbl">${RATING_LABELS[n]}</span>
+      </button>`).join('');
+    return `
+    <div class="q-block">
+      <div class="q-text">${esc(q.text)}</div>
+      <div class="rate-row">${ratesHTML}</div>
+      <div class="field" style="margin-bottom:0;">
+        <label style="font-weight:600;">Comentario o evidencia (opcional)</label>
+        <textarea rows="2" oninput="updateComment('${q.id}', this.value)" placeholder="Ejemplos concretos, observaciones o evidencia que respalde la calificación…">${esc(d.comentarios[q.id]||'')}</textarea>
+      </div>
+    </div>`;
+  }).join('');
+  const complete = dimComplete(dim);
+  return `
+  <div class="dim-tag" style="background:${dim.soft};color:${dim.color};">Dimensión ${dim.id} · ${esc(dim.name)}</div>
+  <h2 class="section-title">${esc(dim.name)}</h2>
+  <p class="section-sub">Califica cada aspecto del 1 (Insatisfactorio) al 5 (Excelente). Puedes agregar evidencia para respaldar la calificación.</p>
+  ${qHTML}
+  <div class="wizard-actions">
+    <button class="btn btn-ghost" onclick="goBack()">← Atrás</button>
+    <button class="btn btn-primary" ${complete?'':'disabled'} onclick="goNext()">${idx===DIMENSIONS.length-1 || wizardSteps(d)[wizardSteps(d).length-1]===dim.id ? 'Ver resultados →' : 'Siguiente →'}</button>
+  </div>`;
+}
+
+/* ---------- Resultados de la evaluación (borrador actual) ---------- */
+function renderResultsView(){
+  const d = state.draft;
+  const scores = computeScores(d);
+  const {top, bottom} = topBottom(d, 3);
+  const radar = radarChart(scores.perDim);
+
+  return `
+  <div class="printable-area">
+    ${renderResultHeader(d, scores)}
+
+    <div class="grid-2" style="margin-top:20px;gap:20px;align-items:stretch;">
+      <div class="card card-pad">
+        <h3 style="font-size:16px;margin-bottom:14px;">Promedio por dimensión</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          ${scores.perDim.map(p=>`
+            <div class="dim-card" style="background:${p.dim.soft};border-color:${p.dim.color};">
+              <div class="dc-top">
+                <div>
+                  <div class="eyebrow" style="color:${p.dim.color};">${esc(p.dim.name)}</div>
+                </div>
+                <div class="dc-score" style="color:${p.dim.color};">${p.avg!=null?fmtScore(p.avg):'—'}</div>
+              </div>
+              <div class="dc-bar"><div class="dc-bar-fill" style="width:${((p.avg||0)/5*100).toFixed(0)}%;background:${p.dim.color};"></div></div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="card card-pad radar-wrap">
+        ${radar ? radar : '<p class="section-sub">Se necesitan al menos 3 dimensiones para el gráfico radar.</p>'}
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:20px;">
+      <div class="card card-pad">
+        <h3 style="font-size:16px;margin-bottom:14px;color:var(--rate-5);">★ Fortalezas destacadas</h3>
+        <ul class="list-highlight">
+          ${top.map(t=>`<li><div><div class="txt">${esc(t.text)}</div><div class="dim">${esc(t.dimName)}</div></div><div class="score" style="color:var(--rate-5);">${t.score}/5</div></li>`).join('') || '<p class="section-sub">Sin datos suficientes.</p>'}
+        </ul>
+      </div>
+      <div class="card card-pad">
+        <h3 style="font-size:16px;margin-bottom:14px;color:var(--rate-2);">▲ Áreas de oportunidad</h3>
+        <ul class="list-highlight">
+          ${bottom.map(t=>`<li><div><div class="txt">${esc(t.text)}</div><div class="dim">${esc(t.dimName)}</div></div><div class="score" style="color:var(--rate-2);">${t.score}/5</div></li>`).join('') || '<p class="section-sub">Sin datos suficientes.</p>'}
+        </ul>
+      </div>
+    </div>
+
+    <div class="card card-pad" style="margin-top:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <h3 style="font-size:16px;">Plan de acción</h3>
+        <button class="btn btn-outline btn-sm no-print" onclick="addPlanRow()">+ Agregar fila</button>
+      </div>
+      <table class="plan-table">
+        <thead><tr><th style="width:34%">Objetivo</th><th style="width:44%">Acción</th><th style="width:15%">Fecha compromiso</th><th class="no-print" style="width:7%"></th></tr></thead>
+        <tbody>
+          ${d.plan.map((row,i)=>`
+            <tr>
+              <td><textarea rows="2" oninput="updatePlanField(${i},'objetivo',this.value)" placeholder="¿Qué se busca lograr?">${esc(row.objetivo)}</textarea></td>
+              <td><textarea rows="2" oninput="updatePlanField(${i},'accion',this.value)" placeholder="¿Qué se hará para lograrlo?">${esc(row.accion)}</textarea></td>
+              <td><input type="date" value="${esc(row.fecha)}" oninput="updatePlanField(${i},'fecha',this.value)"></td>
+              <td class="no-print"><button class="btn btn-icon btn-danger btn-sm" onclick="removePlanRow(${i})" title="Eliminar fila">✕</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card card-pad" style="margin-top:20px;">
+      <h3 style="font-size:16px;margin-bottom:6px;">Firmas</h3>
+      <p class="section-sub">Espacio para validar la evaluación de forma conjunta.</p>
+      <div class="sig-grid">
+        <div class="sig-box">
+          <input type="text" value="${esc(d.firmaEvaluador)}" oninput="updateSignature('firmaEvaluador', this.value)" placeholder="Nombre del evaluador/a">
+          <div class="sig-line">Firma del evaluador/a</div>
+        </div>
+        <div class="sig-box">
+          <input type="text" value="${esc(d.firmaEvaluado)}" oninput="updateSignature('firmaEvaluado', this.value)" placeholder="Nombre del colaborador/a">
+          <div class="sig-line">Firma del colaborador/a</div>
+        </div>
+      </div>
+      <div class="field" style="max-width:220px;margin-top:18px;">
+        <label>Fecha</label>
+        <input type="date" value="${esc(d.fechaFirma)}" oninput="updateSignature('fechaFirma', this.value)">
+      </div>
+    </div>
+  </div>
+
+  <div class="wizard-actions no-print" style="border-top:none;flex-wrap:wrap;gap:10px;">
+    <button class="btn btn-ghost" onclick="backToWizardFromResults()">← Volver a editar calificaciones</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-outline" onclick="viewDraftReport()">📄 Ver informe ejecutivo</button>
+      <button class="btn btn-outline" onclick="window.print()">🖨 Imprimir / Guardar como PDF</button>
+      <button class="btn btn-primary" onclick="saveEvaluationAndReset()">💾 Guardar y evaluar a otro colaborador →</button>
+    </div>
+  </div>`;
+}
+
+function viewDraftReport(){
+  state.reportTargetId = 'draft';
+  state.view = 'report';
+  render(); window.scrollTo(0,0);
+}
+
+function renderResultHeader(d, scores){
+  const r = scores.rating;
+  return `
+  <div class="res-header">
+    <div class="eyebrow" style="color:#C7C4F2;">Resultado de la evaluación</div>
+    <h2 style="font-size:26px;color:#fff;margin-top:4px;">${esc(d.nombre||'Colaborador(a) sin nombre')}</h2>
+    <div class="meta-grid">
+      <div class="meta-item"><div class="k">Cargo</div><div class="v">${esc(d.cargo||'—')}</div></div>
+      <div class="meta-item"><div class="k">Departamento</div><div class="v">${esc(d.departamento||'—')}</div></div>
+      <div class="meta-item"><div class="k">Nivel</div><div class="v">${esc(d.nivel||'—')}</div></div>
+      <div class="meta-item"><div class="k">Tiempo en el puesto</div><div class="v">${esc(d.tiempoPuesto||'—')}</div></div>
+      <div class="meta-item"><div class="k">Jefe inmediato</div><div class="v">${esc(d.jefeInmediato||'—')}</div></div>
+      <div class="meta-item"><div class="k">Período evaluado</div><div class="v">${esc(d.periodo||'—')}</div></div>
+    </div>
+    <div class="badge-row">
+      <div class="badge-score"><div class="n" style="color:var(${r.var})">${fmtScore(scores.overall)}</div><div class="of5">de 5.0</div></div>
+      <div>
+        <div class="badge-rating" style="background:var(${r.soft});color:var(${r.var})">${r.label}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Vista Resumen ---------- */
+function setSearch(v){ state.search = v; render(); }
+function summaryStats(){
+  const evals = state.evaluations;
+  const n = evals.length;
+  const avgAll = n ? evals.reduce((a,e)=>a+e.overall,0)/n : 0;
+  const pctExcelente = n ? Math.round(evals.filter(e=>e.ratingLabel==='Excelente').length/n*100) : 0;
+  const pctMejora = n ? Math.round(evals.filter(e=>e.overall<3.0).length/n*100) : 0;
+  return {n, avgAll, pctExcelente, pctMejora};
+}
+function renderSummaryView(){
+  const stats = summaryStats();
+  if(!state.evaluations.length){
+    return `
+    <div class="empty-state card" style="margin-top:28px;">
+      <div class="big">📋</div>
+      <h2 class="section-title">Aún no hay evaluaciones guardadas</h2>
+      <p class="section-sub">Completa tu primera evaluación de desempeño para ver aquí el resumen consolidado del equipo.</p>
+      <button class="btn btn-primary" style="margin-top:8px;" onclick="setView('wizard')">Comenzar primera evaluación →</button>
+    </div>`;
+  }
+  const q = state.search.trim().toLowerCase();
+  let list = state.evaluations.filter(e =>
+    !q || (e.nombre||'').toLowerCase().includes(q) || (e.cargo||'').toLowerCase().includes(q) || (e.departamento||'').toLowerCase().includes(q)
+  );
+  list = [...list].sort((a,b)=>b.overall-a.overall);
+
+  return `
+  <div style="margin-top:28px;">
+    <h2 class="section-title">Resumen de evaluaciones</h2>
+    <p class="section-sub">Vista consolidada de todos los colaboradores evaluados en esta sesión.</p>
+    <div class="grid-4">
+      <div class="kpi k1"><div class="kpi-label">Colaboradores evaluados</div><div class="kpi-value">${stats.n}</div></div>
+      <div class="kpi k2"><div class="kpi-label">Promedio general</div><div class="kpi-value">${fmtScore(stats.avgAll)}</div></div>
+      <div class="kpi k3"><div class="kpi-label">% Excelente</div><div class="kpi-value">${stats.pctExcelente}%</div></div>
+      <div class="kpi k4"><div class="kpi-label">% Requiere plan de mejora</div><div class="kpi-value">${stats.pctMejora}%</div></div>
+    </div>
+
+    <div class="toolbar">
+      <input class="search-input" type="text" placeholder="Buscar por nombre, cargo o departamento…" value="${esc(state.search)}" oninput="setSearch(this.value)">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="exportBackup()">⬇ Exportar respaldo (JSON)</button>
+        <button class="btn btn-ghost btn-sm" onclick="triggerImport()">⬆ Importar respaldo</button>
+        <input type="file" id="import-file-input" accept="application/json" style="display:none" onchange="handleImportFile(this)">
+      </div>
+    </div>
+
+    <div class="card" style="overflow:auto;">
+      <table class="data-table">
+        <thead><tr>
+          <th>Colaborador</th><th>Cargo</th><th>Departamento</th><th>Nivel</th><th>Promedio</th><th>Calificación</th><th>Fecha</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${list.map(e=>{
+            const r = ratingFor(e.overall);
+            return `<tr>
+              <td style="font-weight:700;">${esc(e.nombre)}</td>
+              <td>${esc(e.cargo)}</td>
+              <td>${esc(e.departamento)}</td>
+              <td>${esc(e.nivel)}</td>
+              <td style="font-family:var(--font-mono);font-weight:700;">${fmtScore(e.overall)}</td>
+              <td><span class="pill" style="background:var(${r.soft});color:var(${r.var});">${r.label}</span></td>
+              <td>${fmtDate(new Date(e.guardadoEn).toISOString().slice(0,10))}</td>
+              <td class="row-actions">
+                <button class="btn btn-ghost btn-sm" onclick="openReport('${e.id}')">Ver informe</button>
+                <button class="btn btn-icon btn-danger btn-sm" onclick="deleteEvaluation('${e.id}')" title="Eliminar">✕</button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+/* ---------- Manual de uso ---------- */
+function renderManualView(){
+  const sections = [
+    { t:'1. Introducción y propósito', open:true, body:`
+      <p><strong>EvalúaRH</strong> es un simulador de evaluación de desempeño diseñado con fines académicos para empresas panameñas. Permite registrar, calificar y documentar el desempeño de un colaborador siguiendo cuatro dimensiones estándar: Desempeño de funciones, Competencias conductuales, Actitud y disciplina laboral, y Liderazgo (esta última solo para niveles Directivo y Supervisión).</p>
+      <p>La aplicación es un único archivo HTML autónomo: no requiere instalación, conexión a internet ni servidores. Todo el procesamiento y almacenamiento ocurre dentro de tu propio navegador.</p>`},
+    { t:'2. Antes de comenzar', body:`
+      <p>Abre el archivo <code>.html</code> con doble clic; se abrirá en tu navegador predeterminado (Chrome, Edge, Firefox o Safari). No necesitas internet para usarlo.</p>
+      <ul>
+        <li>El sistema no genera datos ficticios: cada calificación debe ser ingresada manualmente por la persona evaluadora.</li>
+        <li>Tus evaluaciones guardadas se conservan automáticamente en este navegador y en este equipo, incluso si cierras la pestaña o apagas el computador (ver sección 7 sobre respaldo de datos).</li>
+      </ul>`},
+    { t:'3. Cómo realizar una nueva evaluación', body:`
+      <ol>
+        <li>En la pestaña <strong>«Nueva evaluación»</strong>, completa los datos generales del colaborador. El nombre, cargo y departamento son obligatorios; sin ellos el botón «Comenzar evaluación» permanece deshabilitado.</li>
+        <li>Selecciona el <strong>nivel</strong> del colaborador (Directivo, Supervisión u Operativo). Este dato determina si se incluirá o no el bloque de Liderazgo.</li>
+        <li>Avanza por cada dimensión calificando todas las preguntas del 1 al 5. Puedes añadir un comentario o evidencia opcional en cada pregunta.</li>
+        <li>El botón «Siguiente» se habilita únicamente cuando todas las preguntas de la sección actual han sido calificadas.</li>
+        <li>Puedes usar el panel lateral (o la barra superior en móvil) para volver a una sección ya completada y ajustar una calificación.</li>
+        <li>Al finalizar la última dimensión, llegarás a la pantalla de <strong>Resultados</strong>.</li>
+      </ol>`},
+    { t:'4. Cómo interpretar los resultados y la escala de calificación', body:`
+      <p>Cada dimensión se promedia de forma simple entre sus preguntas. El promedio general es el promedio simple de las dimensiones aplicables (si el colaborador es Operativo, Liderazgo no se incluye en el cálculo).</p>
+      <ul>
+        <li><strong>4.5 – 5.0</strong> → Excelente</li>
+        <li><strong>3.8 – 4.49</strong> → Muy bueno</li>
+        <li><strong>3.0 – 3.79</strong> → Satisfactorio</li>
+        <li><strong>2.0 – 2.99</strong> → Necesita mejorar</li>
+        <li><strong>Menos de 2.0</strong> → Insatisfactorio</li>
+      </ul>
+      <p>El gráfico radar muestra visualmente el desempeño relativo entre dimensiones. Las secciones «Fortalezas destacadas» y «Áreas de oportunidad» se calculan automáticamente identificando las 3 preguntas con mayor y menor calificación, respectivamente — no se seleccionan manualmente.</p>`},
+    { t:'5. Plan de acción, firmas e impresión', body:`
+      <p>En la pantalla de resultados puedes completar una tabla de <strong>Plan de acción</strong> (objetivo, acción concreta y fecha compromiso) y registrar las firmas de evaluador/a y colaborador/a.</p>
+      <p>El botón <strong>«Imprimir / Guardar como PDF»</strong> utiliza la función de impresión del navegador. Al imprimir, la barra de navegación y los botones se ocultan automáticamente, dejando solo el contenido del informe. Para guardar como PDF, elige la opción «Guardar como PDF» en el cuadro de diálogo de impresión de tu navegador.</p>`},
+    { t:'6. Guardar evaluaciones y ver el Informe Ejecutivo', body:`
+      <p>El botón <strong>«Guardar y evaluar a otro colaborador»</strong> almacena la evaluación actual en la lista de la pestaña «Resumen» y reinicia el formulario para comenzar con un nuevo colaborador, sin perder las evaluaciones anteriores.</p>
+      <p>Desde la pestaña «Resumen», el botón <strong>«Ver informe»</strong> abre un <strong>Informe Ejecutivo</strong> redactado automáticamente: un documento formal con resumen narrativo, tabla de resultados por dimensión, gráfico radar, fortalezas, áreas de oportunidad, plan de acción y espacio de firmas — listo para imprimir o exportar a PDF.</p>`},
+    { t:'7. Respaldo y restauración de datos', body:`
+      <p><strong>Importante:</strong> las evaluaciones guardadas se almacenan en el almacenamiento local del navegador (localStorage) de este equipo. Esto significa que:</p>
+      <ul>
+        <li>Los datos persisten aunque cierres el archivo o reinicies el computador, siempre que uses el <em>mismo navegador y el mismo equipo</em>.</li>
+        <li>Si abres el archivo en otro navegador, en modo incógnito, o en otro computador, no verás las evaluaciones guardadas anteriormente.</li>
+        <li>Si borras el historial/caché del navegador, los datos guardados en este simulador también se eliminarán.</li>
+      </ul>
+      <p>Por eso, la pestaña «Resumen» incluye los botones <strong>«Exportar respaldo (JSON)»</strong> e <strong>«Importar respaldo»</strong>: usa el primero periódicamente para descargar un archivo de respaldo con todas tus evaluaciones, y el segundo para restaurarlas en cualquier equipo o navegador.</p>`},
+    { t:'8. Preguntas frecuentes', body:`
+      <p><strong>¿Puedo evaluar a varios colaboradores en una misma sesión?</strong> Sí, no hay límite. Cada evaluación guardada aparece en la pestaña «Resumen».</p>
+      <p><strong>¿Qué pasa si cierro el navegador a mitad de una evaluación?</strong> El borrador en curso se guarda automáticamente; al volver a abrir el archivo en el mismo navegador y equipo, se restaurará donde lo dejaste.</p>
+      <p><strong>¿La aplicación envía datos a internet?</strong> No. Todo el cálculo y almacenamiento ocurre localmente en tu navegador; el archivo no se conecta a ningún servidor.</p>
+      <p><strong>¿Puedo editar una evaluación ya guardada?</strong> Actualmente las evaluaciones guardadas se muestran en modo informe (solo lectura) desde «Resumen». Para corregir datos, elimina el registro y vuelve a completarlo.</p>`},
+    { t:'9. Uso responsable y confidencialidad', body:`
+      <p>Esta herramienta tiene fines académicos. Los resultados de una evaluación de desempeño son información sensible: compártelos únicamente con las personas autorizadas (colaborador evaluado, jefatura inmediata y Recursos Humanos) y conserva los respaldos JSON en un lugar seguro.</p>`}
+  ];
+  return `
+  <div class="manual" style="margin-top:28px;max-width:820px;">
+    <h2 class="section-title">Manual de uso</h2>
+    <p class="section-sub">Guía completa para sacar el máximo provecho de EvalúaRH.</p>
+    ${sections.map(s=>`
+      <details ${s.open?'open':''}>
+        <summary>${esc(s.t)}</summary>
+        <div class="m-body">${s.body}</div>
+      </details>`).join('')}
+  </div>`;
+}
+
+/* ---------- Informe ejecutivo (evaluación guardada o en curso) ---------- */
+function renderReportView(){
+  const isDraft = state.reportTargetId === 'draft';
+  const ev = isDraft ? state.draft : state.evaluations.find(e=>e.id===state.reportTargetId);
+  if(!ev){
+    return `<div class="card card-pad" style="margin-top:28px;">
+      <p>No se encontró la evaluación solicitada.</p>
+      <button class="btn btn-primary" style="margin-top:12px;" onclick="setView('summary')">← Volver al resumen</button>
+    </div>`;
+  }
+  const scores = computeScores(ev);
+  const {top, bottom} = topBottom(ev, 3);
+  const narrative = generateNarrative(ev, scores);
+  const radar = radarChart(scores.perDim);
+  const fechaGuardado = isDraft ? new Date() : new Date(ev.guardadoEn);
+  const backLabel = isDraft ? '← Volver a resultados' : '← Volver al resumen';
+  const backAction = isDraft ? "setView('results')" : "setView('summary')";
+
+  return `
+  <div class="no-print" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <button class="btn btn-ghost" onclick="${backAction}">${backLabel}</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      ${isDraft ? `<button class="btn btn-primary" onclick="saveEvaluationAndReset()">💾 Guardar y evaluar a otro colaborador →</button>` : ''}
+      <button class="btn btn-outline" onclick="window.print()">🖨 Imprimir / Guardar como PDF</button>
+    </div>
+  </div>
+  ${isDraft ? `<div class="no-print card card-pad" style="margin-top:14px;background:var(--primary-soft);border-color:var(--primary);"><p style="font-size:13.5px;color:var(--primary-dark);"><strong>Vista previa:</strong> esta evaluación aún no se ha guardado. Usa «Guardar y evaluar a otro colaborador» para conservarla en el Resumen.</p></div>` : ''}
+
+  <div class="printable-area" style="margin-top:16px;">
+    <div class="card card-pad">
+      <div class="eyebrow">Informe ejecutivo de evaluación de desempeño</div>
+      <h2 class="section-title" style="margin-top:6px;">${esc(ev.nombre)}</h2>
+      <p class="section-sub">Documento generado automáticamente por EvalúaRH el ${fechaGuardado.toLocaleDateString('es-PA')}</p>
+
+      <div class="grid-3" style="margin:18px 0 6px;">
+        <div class="field" style="margin-bottom:0;"><label>Cargo</label><p>${esc(ev.cargo)}</p></div>
+        <div class="field" style="margin-bottom:0;"><label>Departamento</label><p>${esc(ev.departamento)}</p></div>
+        <div class="field" style="margin-bottom:0;"><label>Nivel</label><p>${esc(ev.nivel)}</p></div>
+        <div class="field" style="margin-bottom:0;"><label>Tiempo en el puesto</label><p>${esc(ev.tiempoPuesto||'—')}</p></div>
+        <div class="field" style="margin-bottom:0;"><label>Jefe inmediato</label><p>${esc(ev.jefeInmediato||'—')}</p></div>
+        <div class="field" style="margin-bottom:0;"><label>Período evaluado</label><p>${esc(ev.periodo||'—')}</p></div>
+      </div>
+
+      <div class="badge-row" style="margin-top:10px;">
+        <div class="badge-score" style="box-shadow:var(--shadow-md);border:1.5px solid var(--border);">
+          <div class="n" style="color:var(${scores.rating.var})">${fmtScore(scores.overall)}</div><div class="of5">de 5.0</div>
+        </div>
+        <div class="badge-rating" style="background:var(${scores.rating.soft});color:var(${scores.rating.var})">${scores.rating.label}</div>
+      </div>
+    </div>
+
+    <div class="card card-pad" style="margin-top:18px;">
+      <h3 style="font-size:16px;margin-bottom:12px;">Resumen ejecutivo</h3>
+      <p style="line-height:1.8;margin-bottom:12px;">${esc(narrative.apertura)}</p>
+      <p style="line-height:1.8;margin-bottom:12px;">${esc(narrative.parrafoDims)}</p>
+      <p style="line-height:1.8;margin-bottom:12px;">${esc(narrative.fortalezasTxt)}</p>
+      <p style="line-height:1.8;margin-bottom:12px;">${esc(narrative.oportunidadesTxt)}</p>
+      <p style="line-height:1.8;">${esc(narrative.cierre)}</p>
+    </div>
+
+    <div class="grid-2" style="margin-top:18px;gap:20px;">
+      <div class="card card-pad">
+        <h3 style="font-size:16px;margin-bottom:14px;">Resultados por dimensión</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          ${scores.perDim.map(p=>`
+            <div class="dim-card" style="background:${p.dim.soft};border-color:${p.dim.color};">
+              <div class="dc-top"><div class="eyebrow" style="color:${p.dim.color};">${esc(p.dim.name)}</div><div class="dc-score" style="color:${p.dim.color};">${p.avg!=null?fmtScore(p.avg):'—'}</div></div>
+              <div class="dc-bar"><div class="dc-bar-fill" style="width:${((p.avg||0)/5*100).toFixed(0)}%;background:${p.dim.color};"></div></div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="card card-pad radar-wrap">${radar || '<p class="section-sub">Gráfico no disponible.</p>'}</div>
+    </div>
+
+    <div class="grid-2" style="margin-top:18px;">
+      <div class="card card-pad">
+        <h3 style="font-size:16px;margin-bottom:14px;color:var(--rate-5);">★ Fortalezas destacadas</h3>
+        <ul class="list-highlight">${top.map(t=>`<li><div><div class="txt">${esc(t.text)}</div><div class="dim">${esc(t.dimName)}</div></div><div class="score" style="color:var(--rate-5);">${t.score}/5</div></li>`).join('')}</ul>
+      </div>
+      <div class="card card-pad">
+        <h3 style="font-size:16px;margin-bottom:14px;color:var(--rate-2);">▲ Áreas de oportunidad</h3>
+        <ul class="list-highlight">${bottom.map(t=>`<li><div><div class="txt">${esc(t.text)}</div><div class="dim">${esc(t.dimName)}</div></div><div class="score" style="color:var(--rate-2);">${t.score}/5</div></li>`).join('')}</ul>
+      </div>
+    </div>
+
+    <div class="card card-pad" style="margin-top:18px;">
+      <h3 style="font-size:16px;margin-bottom:14px;">Plan de acción</h3>
+      <table class="plan-table">
+        <thead><tr><th>Objetivo</th><th>Acción</th><th>Fecha compromiso</th></tr></thead>
+        <tbody>${(ev.plan||[]).filter(r=>r.objetivo||r.accion||r.fecha).map(r=>`
+          <tr><td>${esc(r.objetivo)||'—'}</td><td>${esc(r.accion)||'—'}</td><td>${r.fecha?fmtDate(r.fecha):'—'}</td></tr>`).join('') || '<tr><td colspan="3" style="color:var(--ink-faint);">Sin acciones registradas.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card card-pad" style="margin-top:18px;">
+      <h3 style="font-size:16px;margin-bottom:6px;">Firmas</h3>
+      <div class="sig-grid">
+        <div class="sig-box"><div class="sig-line">${esc(ev.firmaEvaluador)||'\u00A0'}<br><span style="font-size:11px;">Firma del evaluador/a</span></div></div>
+        <div class="sig-box"><div class="sig-line">${esc(ev.firmaEvaluado)||'\u00A0'}<br><span style="font-size:11px;">Firma del colaborador/a</span></div></div>
+      </div>
+      <p style="margin-top:14px;color:var(--ink-soft);font-size:13px;">Fecha: ${ev.fechaFirma?fmtDate(ev.fechaFirma):'—'}</p>
+    </div>
+  </div>`;
+}
+
+/* ===========================================================================
+   INICIALIZACIÓN
+   ========================================================================= */
+function init(){
+  state.evaluations = loadEvaluations();
+  const savedDraft = loadDraft();
+  if(savedDraft && (savedDraft.nombre || Object.keys(savedDraft.respuestas||{}).length)){
+    state.draft = Object.assign(emptyDraft(), savedDraft);
+    setTimeout(()=>showToast('Se restauró una evaluación en curso.','info'), 300);
+  }
+  render();
+  if(!storageOK){
+    setTimeout(()=>showToast('El almacenamiento local no está disponible; los datos no se guardarán entre sesiones.','err'), 600);
+  }
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
